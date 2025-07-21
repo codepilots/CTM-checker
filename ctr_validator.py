@@ -140,7 +140,8 @@ def verify_source(parsed: Dict[str, Any], debug: bool = False) -> Dict[str, Any]
     if verified == "No" and t == 'journal':
         checks.append("Performed general academic search for article.")
         query = f"{parsed.get('title', '')}"# {parsed.get('author', '')} {parsed.get('journal', '')}"
-        url = f"https://api.openalex.org/works?search={requests.utils.quote(query)}"if debug:
+        url = f"https://api.openalex.org/works?search={requests.utils.quote(query)}"
+        if debug:
             details.append(f"DEBUG: Fallback search query: '{query}'")
             details.append(f"DEBUG: OpenAlex API URL: {url}")
         try:
@@ -176,13 +177,30 @@ def verify_source(parsed: Dict[str, Any], debug: bool = False) -> Dict[str, Any]
                             details.append(f"DEBUG: Result {i+1}: Year={pub_year}")
                             details.append(f"DEBUG: Result {i+1}: DOI={doi}")
                     
-                    details.append("General academic search found potential matches, but no definitive, direct link.")
-                    verified = "Partial"
+                    for i, result in enumerate(results):
+                        if parsed.get('title', '').lower() in result.get('title', '').lower() and parsed.get('author', '').split(',')[0] in result.get('authorships', [{}])[0].get('author', {}).get('display_name', '') and str(parsed.get('year', '')) == str(result.get('publication_year', '')):
+                            verified = "Yes"
+                            clickable_link = result.get('doi', 'No DOI')
+                            details.append(f"Verified match found: Title='{result.get('title', '')}', DOI='{clickable_link}'.")
+                            break
+
+                    if verified == "No":
+                        details.append("General academic search found potential matches, but no definitive match.")
+                        if count > 0:
+                            first_result = results[0]
+                            title = first_result.get('title', 'No title')
+                            authors = first_result.get('authorships', [])
+                            author_names = ', '.join([auth.get('author', {}).get('display_name', 'Unknown') for auth in authors])
+                            journal_name = first_result.get('primary_location', {}).get('source', {}).get('display_name', 'Unknown journal')
+                            pub_year = first_result.get('publication_year', 'Unknown')
+                            doi = first_result.get('doi', 'No DOI')
+                            details.append(f"First match: Title='{title}', Authors='{author_names}', Year={pub_year}, Journal='{journal_name}', DOI='{doi}'.")
+                        verified = "Partial"
                 else:
-                    details.append("General academic search did not find a match.")else:
+                    details.append("General academic search did not find a match.") #else:
                 if debug:
                     details.append(f"DEBUG: API request failed with status {r.status_code}")
-                details.append("General academic search did not find a match.")
+                    
         except requests.exceptions.RequestException as e:
             details.append(f"Error performing academic search: {str(e)}")
             if debug:
