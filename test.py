@@ -9,7 +9,10 @@ import os
 # The test references from the Canvas
 TEST_REFERENCES = """
 Browne, T.B., Carlson, T.B. and Hastie, P.A., (2004) 'A comparison of rugby seasons presented in traditional and sport education formats', European Physical Education Review, 10(2), pp.199-214.
+Sommerville, I., (2011) Software engineering. America: Pearson Education Inc. ISBN 0137035151
+Pressman, R.S., and Maxim, B. (2009) Software engineering: a practitioner's approach. 7th ed. New York: McGraw-Hill. ISBN 9780073375977
 """
+
 #Palmer, P. (2007) 'The social effects of sport: What rugby can teach us', Journal of Sports Sociology, 15(3), pp. 210-225.
 #Smith, J. and Jones, A. (2020) 'The impact of digital technology on education', Educational Technology & Society, 23(1), pp. 123-135. doi: 10.1109/SET.2020.1234567.
 #Davies, C. (2023) 'The future of artificial intelligence', New Scientist, 257(3429), pp. 30-35.
@@ -137,7 +140,7 @@ def run_test():
         # Ensure 'ctr_validator.py' is in the same directory or in your PATH
         # The script is expected to take the file path as a command-line argument
         result = subprocess.run(
-            ['python', 'ctr_validator.py','-f', temp_file_path],
+            ['python', 'ctr_validator.py','-f', temp_file_path,'-d'],
             capture_output=True,
             text=True, # Capture stdout/stderr as text, not bytes
             check=False, # Do NOT raise CalledProcessError immediately, capture stderr first
